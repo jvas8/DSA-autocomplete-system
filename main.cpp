@@ -4,6 +4,11 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
+#include <termios.h>  
+#include <unistd.h>   
+#include <cstdlib>   //last 3 #includes are for live output while user types
+
+
 using namespace std;
 
 class TrieNode {
@@ -108,23 +113,53 @@ void loadDictionaryFromFile(Trie &t, const string &filename) {
 
     file.close();
 }
+char getch() {
+    char buf = 0;
+    struct termios old = {0};
+    if (tcgetattr(STDIN_FILENO, &old) < 0) perror("tcgetattr()");
+    old.c_lflag &= ~ICANON; // disable buffered i/o
+    old.c_lflag &= ~ECHO;   // disable echo
+    if (tcsetattr(STDIN_FILENO, TCSANOW, &old) < 0) perror("tcsetattr ICANON");
+    if (read(STDIN_FILENO, &buf, 1) < 0) perror("read()");
+    old.c_lflag |= ICANON;
+    old.c_lflag |= ECHO;
+    if (tcsetattr(STDIN_FILENO, TCSADRAIN, &old) < 0) perror("tcsetattr ~ICANON");
+    return buf;
+}
+
 
 int main() {
-    Trie t;
+     Trie t;
 
     loadDictionaryFromFile(t, "dictionary.txt");
 
     cout << "Dictionary loaded successfully.\n";
 
     string prefix;
-    cout << "\nEnter prefix: ";
-    cin >> prefix;
+    char c;
 
-    vector<string> results = t.autocomplete(prefix);
+    cout << "\nStart typing (Press ENTER to exit):\n";
 
-    cout << "\nSuggestions:\n";
-    for (string s : results)
-        cout << " - " << s << endl;
+    while (true) {
+        c = getch();
 
+        if (c == '\n') break;    // Enter = exit
+        if (c == 127 || c == 8) { // Backspace (127 on Linux, 8 on some systems)
+            if (!prefix.empty()) prefix.pop_back();
+        } else {
+            prefix += c;
+        }
+
+        system("clear");  // Clear terminal screen
+        cout << "You typed: " << prefix << "\n\n";
+
+        vector<string> results = t.autocomplete(prefix);
+
+        cout << "Suggestions:\n";
+        for (string &s : results)
+            cout << " - " << s << "\n";
+
+        cout << "\nKeep typing...";
+    }
     return 0;
 }
