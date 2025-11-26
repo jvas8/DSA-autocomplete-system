@@ -6,7 +6,7 @@
 #include <fstream>
 #include <termios.h>  
 #include <unistd.h>   
-#include <cstdlib>   //last 3 #includes are for live output while user types
+#include <cstdlib>  
 
 
 using namespace std;
@@ -143,14 +143,14 @@ int main() {
     while (true) {
         c = getch();
 
-        if (c == '\n') break;    // Enter = exit
-        if (c == 127 || c == 8) { // Backspace (127 on Linux, 8 on some systems)
+        if (c == '\n') break;    
+        if (c == 127 || c == 8) { 
             if (!prefix.empty()) prefix.pop_back();
         } else {
             prefix += c;
         }
 
-        system("clear");  // Clear terminal screen
+        system("clear");  
         cout << "You typed: " << prefix << "\n\n";
 
         vector<string> results = t.autocomplete(prefix);
