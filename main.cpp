@@ -3,12 +3,13 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <fstream>
 using namespace std;
 
 class TrieNode {
 public:
     bool isEnd;
-    int freq; 
+    int freq;  
     unordered_map<char, TrieNode*> children;
 
     TrieNode() {
@@ -68,22 +69,6 @@ public:
         current->freq = frequency;
     }
 
-    bool search(const string& word) {
-        TrieNode* current = root;
-
-        for (char c : word) {
-            if (current->children.find(c) == current->children.end())
-                return false;
-            current = current->children[c];
-        }
-
-        return current->isEnd;
-    }
-
-    void removeWord(const string& word) {
-        deleteHelper(root, word, 0);
-    }
-
     vector<string> autocomplete(const string& prefix) {
         TrieNode* current = root;
 
@@ -93,40 +78,43 @@ public:
             current = current->children[c];
         }
 
-        vector<pair<string,int>> temp;
-        collectWords(current, prefix, temp);
+        vector<pair<string,int>> collected;
+        collectWords(current, prefix, collected);
 
-        sort(temp.begin(), temp.end(),
+        sort(collected.begin(), collected.end(),
             [](auto &a, auto &b){ return a.second > b.second; });
 
         vector<string> results;
-        for (auto &p : temp)
+        for (auto &p : collected)
             results.push_back(p.first);
 
         return results;
     }
 };
 
+void loadDictionaryFromFile(Trie &t, const string &filename) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "Error: Could not open " << filename << endl;
+        return;
+    }
+
+    string word;
+    int freq;
+
+    while (file >> word >> freq) {
+        t.insert(word, freq);
+    }
+
+    file.close();
+}
+
 int main() {
     Trie t;
 
-    vector<pair<string,int>> dictionary = {
-        {"the",5000},{"of",4800},{"and",4700},{"to",4500},{"a",4400},
-        {"in",4200},{"for",4000},{"is",3900},{"on",3800},{"that",3700},
-        {"by",3500},{"this",3400},{"with",3300},{"i",3200},{"you",3100},
-        {"it",3000},{"not",2900},{"or",2800},{"be",2700},{"are",2600},
-        {"from",2500},{"at",2400},{"as",2300},{"your",2200},{"all",2100},
-        {"have",2000},{"new",1900},{"more",1800},{"an",1700},{"was",1600},
-        {"we",1500},{"will",1400},{"home",1300},{"can",1200},{"us",1100},
-        {"about",1000},{"if",900},{"page",800},{"my",700},{"has",600},
-        {"search",500},{"free",400},{"but",300},{"our",200},{"one",100},
-        {"other",90},{"do",80},{"no",70},{"information",60},{"time",50}
-    };
+    loadDictionaryFromFile(t, "dictionary.txt");
 
-    for (auto &p : dictionary)
-        t.insert(p.first, p.second);
-
-    cout << "Loaded " << dictionary.size() << " words.\n";
+    cout << "Dictionary loaded successfully.\n";
 
     string prefix;
     cout << "\nEnter prefix: ";
@@ -136,7 +124,7 @@ int main() {
 
     cout << "\nSuggestions:\n";
     for (string s : results)
-        cout << " - " << s << "\n";
+        cout << " - " << s << endl;
 
     return 0;
 }
