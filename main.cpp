@@ -119,23 +119,18 @@ int main() {
     cout << "Loaded " << dictionary.size() << " words.\n";
 
 
-    t.insert("cat");
-    t.insert("car");
-    t.insert("dog");
+   string prefix;
+    cout << "\nEnter prefix: ";
+    cin >> prefix;
 
-    cout << "Inserted: cat, car, dog\n";
 
-    cout << "\n=== SEARCH TEST ===\n";
-    cout << "Search cat: " << t.search("cat") << endl;
-    cout << "Search car: " << t.search("car") << endl;
-    cout << "Search cap: " << t.search("cap") << endl;
-    cout << "Search dog: " << t.search("dog") << endl;
-    
-     cout << "Before delete, search cat: " << t.search("cat") << endl;
+    vector<string> results = t.autocomplete(prefix);
 
-    t.removeWord("cat");
 
-    cout << "After delete, search cat: " << t.search("cat") << endl;
+    cout << "\nSuggestions:\n";
+    for (string s : results)
+        cout << " - " << s << endl;
+
 
 
 
