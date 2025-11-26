@@ -83,6 +83,22 @@ public:
      void removeWord(const string& word) {
         deleteHelper(root, word, 0);
     }
+    vector<string> autocomplete(const string& prefix) {
+        TrieNode* current = root;
+
+
+        for (char c : prefix) {
+            if (current->children.find(c) == current->children.end())
+                return {};  // No matches
+            current = current->children[c];
+        }
+
+
+        vector<string> results;
+        collectWords(current, prefix, results);
+        return results;
+    }
+
 
 };
 
