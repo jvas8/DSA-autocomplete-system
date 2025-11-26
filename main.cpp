@@ -1,6 +1,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <string>
+#include <vector>
 using namespace std;
 
 class TrieNode {
@@ -38,6 +39,15 @@ private:
 
         return false;
     }
+    void collectWords(TrieNode* node, string current, vector<string>& results) {
+        if (node->isEnd)
+            results.push_back(current);
+
+
+        for (auto &pair : node->children)
+            collectWords(pair.second, current + pair.first, results);
+    }
+
 
 
 public:
